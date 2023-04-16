@@ -1,27 +1,57 @@
 require("dotenv").config({ path: "~/.diably-apn" });
 const https = require("https");
 
+const getUserdata = (exports.getUserdata = async function getUserdata(
+  userdata
+) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      `${process.env.OPENGLUCK_URL}/opengluck/userdata/${userdata}`,
+      (res) => {
+        let chunks = [];
+        res.on("data", (chunk) => {
+          chunks.push(chunk);
+        });
+        res.on("end", () => {
+          const data = Buffer.concat(chunks).toString();
+          resolve(JSON.parse(data));
+        });
+        res.on("error", reject);
+      }
+    );
+    req.setHeader("Authorization", `Bearer ${process.env.OPENGLUCK_TOKEN}`);
+    req.end();
+  });
+});
+
+exports.setUserdata = async function setUserdata(userdata, value) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      `${process.env.OPENGLUCK_URL}/opengluck/userdata/${userdata}`,
+      { method: "PUT" },
+      (res) => {
+        let chunks = [];
+        res.on("data", (chunk) => {
+          chunks.push(chunk);
+        });
+        res.on("end", () => {
+          if (res.statusCode !== 201) {
+            reject(new Error(`Unexpected status code: ${res.statusCode}`));
+          }
+          resolve();
+        });
+        res.on("error", reject);
+      }
+    );
+    req.setHeader("Authorization", `Bearer ${process.env.OPENGLUCK_TOKEN}`);
+    req.setHeader("Content-type", "application/json");
+    req.end(JSON.stringify(value));
+  });
+};
+
 const getCgmCurrentDeviceProperties = (exports.getCgmCurrentDeviceProperties =
   async function getCgmCurrentDeviceProperties() {
-    return new Promise((resolve, reject) => {
-      const req = https.request(
-        `${process.env.OPENGLUCK_URL}/opengluck/userdata/cgm-current-device-properties`,
-        (res) => {
-          let chunks = [];
-          res.on("data", (chunk) => {
-            chunks.push(chunk);
-          });
-          res.on("end", () => {
-            const data = Buffer.concat(chunks).toString();
-            const properties = JSON.parse(data);
-            resolve(properties);
-          });
-          res.on("error", reject);
-        }
-      );
-      req.setHeader("Authorization", `Bearer ${process.env.OPENGLUCK_TOKEN}`);
-      req.end();
-    });
+    return await getUserdata("cgm-current-device-properties");
   });
 
 exports.hasCgmRealTimeData = async function hasCgmRealTimeData() {
