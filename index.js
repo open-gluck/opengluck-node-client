@@ -5,7 +5,6 @@ const getCgmCurrentDeviceProperties = (exports.getCgmCurrentDeviceProperties =
   async function getCgmCurrentDeviceProperties() {
     return new Promise((resolve, reject) => {
       const req = https.request(
-        // https://opengluck.christopher.dev.api.makesuccess.io/userdata/cgm-current-device-properties/string
         `${process.env.OPENGLUCK_URL}/opengluck/userdata/cgm-current-device-properties`,
         (res) => {
           let chunks = [];
@@ -28,4 +27,3 @@ const getCgmCurrentDeviceProperties = (exports.getCgmCurrentDeviceProperties =
 exports.hasCgmRealTimeData = async function hasCgmRealTimeData() {
   return (await getCgmCurrentDeviceProperties())["has-real-time"];
 };
-
