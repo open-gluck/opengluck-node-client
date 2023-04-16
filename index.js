@@ -57,3 +57,27 @@ const getCgmCurrentDeviceProperties = (exports.getCgmCurrentDeviceProperties =
 exports.hasCgmRealTimeData = async function hasCgmRealTimeData() {
   return (await getCgmCurrentDeviceProperties())["has-real-time"];
 };
+
+exports.getCurrentGlucose = async function getCurrentGlucose() {
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      `${process.env.OPENGLUCK_URL}/opengluck/glucose/current`,
+      (res) => {
+        let chunks = [];
+        res.on("data", (chunk) => {
+          chunks.push(chunk);
+        });
+        res.on("end", () => {
+          if (res.statusCode !== 200) {
+            reject(new Error(`Unexpected status code: ${res.statusCode}`));
+          }
+          resolve(JSON.parse(Buffer.concat(chunks).toString("utf-8")));
+        });
+        res.on("error", reject);
+      }
+    );
+    req.setHeader("Authorization", `Bearer ${process.env.OPENGLUCK_TOKEN}`);
+    req.setHeader("Content-type", "application/json");
+    req.end();
+  });
+};
