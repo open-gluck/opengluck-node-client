@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "~/.diably-apn" });
+require("dotenv").config({ path: "~/.opengluck-apn" });
 const https = require("https");
 
 const getUserdata = (exports.getUserdata = async function getUserdata(
